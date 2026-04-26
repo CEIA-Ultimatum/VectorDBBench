@@ -1,0 +1,18 @@
+============================================================
+RESUMO DO BENCHMARK
+============================================================
+Data/Hora: 2026-04-25 17:43:51
+Dataset: 1m (1M vetores, 768 dim (Cohere) - Padrao (~30-60 min))
+Banco(s): all
+
+CONFIGURACAO:
+- PostgreSQL: localhost:5434
+- Elasticsearch: localhost:9201
+- OpenSearch: localhost:9200
+- Skip Cleanup: false
+- Keep Data: false
+
+RESULTADOS:
+Diretorio: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524
+
+Arquivos:

@@ -1,0 +1,153 @@
+[2026-04-25 15:55:24] INFO: ================================================
+[2026-04-25 15:55:24] INFO: BENCHMARK SEQUENCIAL - VectorDBBench
+[2026-04-25 15:55:24] INFO: ================================================
+[2026-04-25 15:55:24] INFO: Dataset: 50k (50K vetores, 1536 dim (OpenAI) - Teste rapido (~5 min))
+[2026-04-25 15:55:24] INFO: Banco(s): all
+[2026-04-25 15:55:24] INFO: Results: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524
+[2026-04-25 15:55:24] INFO: Dry-run: false
+[2026-04-25 15:55:24] INFO: Skip-cleanup: false
+[2026-04-25 15:55:24] INFO: Keep-data: false
+[2026-04-25 15:55:24] INFO: ================================================
+[2026-04-25 15:55:24] INFO: Modo RESET LIMPO: Containers/volumes serao removidos (mais rapido)
+[2026-04-25 15:55:24] INFO: === VERIFICANDO E LIMPANDO CONTAINERS EXISTENTES ===
+[2026-04-25 15:55:24] INFO: Nenhum container de benchmark encontrado rodando
+[2026-04-25 15:55:25] INFO: === VERIFICANDO DEPENDENCIAS ===
+[2026-04-25 15:55:25] INFO: Todas as dependencias verificadas
+[2026-04-25 15:55:25] INFO: === CONFIGURANDO DIRETORIO DE RESULTADOS ===
+[2026-04-25 15:55:25] INFO: Diretorio de resultados: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524
+[2026-04-25 15:55:25] INFO: Arquivo de log: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524/benchmark.log
+[2026-04-25 15:55:25] INFO: 
+[2026-04-25 15:55:25] INFO: ============================================================
+[2026-04-25 15:55:25] INFO: EXECUTANDO DATASET: 50k
+[2026-04-25 15:55:25] INFO: CASE TYPE: Performance1536D50K
+[2026-04-25 15:55:25] INFO: DESCRICAO: 50K vetores, 1536 dim (OpenAI) - Teste rapido (~5 min)
+[2026-04-25 15:55:25] INFO: ============================================================
+[2026-04-25 15:55:25] INFO: === INICIANDO POSTGRESQL ===
+[2026-04-25 15:55:25] INFO: Criando novo container PostgreSQL...
+[2026-04-25 15:55:25] INFO: Nota: Primeira inicialização pode levar 2-3 minutos (download da imagem + setup)
+[2026-04-25 15:55:25] EXECUTANDO: docker-compose up -d postgres
+[2026-04-25 15:55:25] INFO: PostgreSQL iniciado. Aguardando healthcheck...
+[2026-04-25 15:55:25] INFO: === AGUARDANDO POSTGRESQL ===
+[2026-04-25 15:55:25] INFO: Verificando healthcheck do container...
+[2026-04-25 15:55:35] INFO: Container PostgreSQL esta healthy (10s)
+[2026-04-25 15:55:40] INFO: PostgreSQL esta pronto para conexoes!
+[2026-04-25 15:55:40] INFO: === BENCHMARK PGVECTOR - Performance1536D50K ===
+[2026-04-25 15:55:40] EXECUTANDO: vectordbbench pgvectorhnsw --user-name postgres --password postgres --host localhost --port 5434 --db-name psql_jurisprudencia --case-type Performance1536D50K --m 16 --ef-construction 128 --ef-search 128 --maintenance-work-mem 4GB --max-parallel-workers 4 --db-label pgvector_50k_20260425_155524
+[2026-04-25 16:01:22] INFO: Benchmark pgvector concluido
+[2026-04-25 16:01:22] INFO: === PARANDO POSTGRESQL ===
+[2026-04-25 16:01:22] EXECUTANDO: docker-compose rm -sf postgres
+[2026-04-25 16:01:22] INFO: PostgreSQL parado
+[2026-04-25 16:01:22] INFO: 
+[2026-04-25 16:01:22] INFO: === INICIANDO ELASTICSEARCH ===
+[2026-04-25 16:01:22] INFO: Container bench-elasticsearch existe mas esta parado, iniciando...
+[2026-04-25 16:01:22] EXECUTANDO: docker-compose start elasticsearch
+[2026-04-25 16:01:22] INFO: Elasticsearch iniciado. Aguardando healthcheck...
+[2026-04-25 16:01:22] INFO: === AGUARDANDO ELASTICSEARCH ===
+[2026-04-25 16:01:32] INFO: Elasticsearch esta pronto! (status: green, 10s)
+[2026-04-25 16:01:37] INFO: === BENCHMARK ELASTICSEARCH - Performance1536D50K ===
+[2026-04-25 16:01:37] EXECUTANDO: vectordbbench elasticcloudhnsw --host localhost --port 9201 --scheme http --user elastic --password='' --case-type Performance1536D50K --m 16 --ef-construction 100 --num-candidates 100 --number-of-shards 1 --number-of-replicas 0 --refresh-interval 30s --db-label es_50k_20260425_155524
+[2026-04-25 16:07:53] INFO: Benchmark Elasticsearch concluido
+[2026-04-25 16:07:53] INFO: === PARANDO ELASTICSEARCH ===
+[2026-04-25 16:07:53] EXECUTANDO: docker-compose rm -sf elasticsearch
+[2026-04-25 16:07:57] INFO: Elasticsearch parado
+[2026-04-25 16:07:57] INFO: 
+[2026-04-25 16:07:57] INFO: === INICIANDO OPENSEARCH ===
+[2026-04-25 16:07:57] INFO: Criando novo container OpenSearch...
+[2026-04-25 16:07:57] INFO: Nota: Primeira inicialização pode levar 2-3 minutos
+[2026-04-25 16:07:57] EXECUTANDO: docker-compose up -d opensearch
+[2026-04-25 16:07:58] INFO: OpenSearch iniciado. Aguardando healthcheck...
+[2026-04-25 16:07:58] INFO: === AGUARDANDO OPENSEARCH ===
+[2026-04-25 16:08:08] INFO: OpenSearch esta pronto! (status: green, 10s)
+[2026-04-25 16:08:13] INFO: === BENCHMARK OPENSEARCH - Performance1536D50K ===
+[2026-04-25 16:08:13] EXECUTANDO: vectordbbench ossopensearch --host localhost --port 9200 --user admin --password admin --metric-type cosine --case-type Performance1536D50K --m 16 --ef-construction 200 --ef-search 100 --engine faiss --number-of-shards 1 --number-of-replicas 0 --quantization-type None --db-label os_50k_20260425_155524
+[2026-04-25 16:15:29] INFO: Benchmark OpenSearch concluido
+[2026-04-25 16:15:29] INFO: === PARANDO OPENSEARCH ===
+[2026-04-25 16:15:29] EXECUTANDO: docker-compose rm -sf opensearch
+[2026-04-25 16:15:31] INFO: OpenSearch parado
+[2026-04-25 16:15:31] INFO: 
+[2026-04-25 16:15:31] INFO: === GERANDO RESUMO ===
+[2026-04-25 16:15:31] INFO: Resumo gerado: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524/summary.txt
+[2026-04-25 16:15:31] INFO: 
+[2026-04-25 16:15:31] INFO: ============================================================
+[2026-04-25 16:15:31] INFO: BENCHMARK CONCLUIDO!
+[2026-04-25 16:15:31] INFO: ============================================================
+[2026-04-25 16:15:31] INFO: Resultados em: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524
+[2026-04-25 16:15:31] INFO: Log completo: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524/benchmark.log
+[2026-04-25 16:15:31] INFO: ============================================================
+[2026-04-25 16:15:31] INFO: ================================================
+[2026-04-25 16:15:31] INFO: BENCHMARK SEQUENCIAL - VectorDBBench
+[2026-04-25 16:15:31] INFO: ================================================
+[2026-04-25 16:15:31] INFO: Dataset: 1m (1M vetores, 768 dim (Cohere) - Padrao (~30-60 min))
+[2026-04-25 16:15:31] INFO: Banco(s): all
+[2026-04-25 16:15:31] INFO: Results: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524
+[2026-04-25 16:15:31] INFO: Dry-run: false
+[2026-04-25 16:15:31] INFO: Skip-cleanup: false
+[2026-04-25 16:15:31] INFO: Keep-data: false
+[2026-04-25 16:15:31] INFO: ================================================
+[2026-04-25 16:15:31] INFO: Modo RESET LIMPO: Containers/volumes serao removidos (mais rapido)
+[2026-04-25 16:15:31] INFO: === VERIFICANDO E LIMPANDO CONTAINERS EXISTENTES ===
+[2026-04-25 16:15:32] INFO: Nenhum container de benchmark encontrado rodando
+[2026-04-25 16:15:32] INFO: === VERIFICANDO DEPENDENCIAS ===
+[2026-04-25 16:15:32] INFO: Todas as dependencias verificadas
+[2026-04-25 16:15:32] INFO: === CONFIGURANDO DIRETORIO DE RESULTADOS ===
+[2026-04-25 16:15:32] INFO: Diretorio de resultados: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524
+[2026-04-25 16:15:32] INFO: Arquivo de log: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524/benchmark.log
+[2026-04-25 16:15:32] INFO: 
+[2026-04-25 16:15:32] INFO: ============================================================
+[2026-04-25 16:15:32] INFO: EXECUTANDO DATASET: 1m
+[2026-04-25 16:15:32] INFO: CASE TYPE: Performance768D1M
+[2026-04-25 16:15:32] INFO: DESCRICAO: 1M vetores, 768 dim (Cohere) - Padrao (~30-60 min)
+[2026-04-25 16:15:32] INFO: ============================================================
+[2026-04-25 16:15:32] INFO: === INICIANDO POSTGRESQL ===
+[2026-04-25 16:15:32] INFO: Criando novo container PostgreSQL...
+[2026-04-25 16:15:32] INFO: Nota: Primeira inicialização pode levar 2-3 minutos (download da imagem + setup)
+[2026-04-25 16:15:32] EXECUTANDO: docker-compose up -d postgres
+[2026-04-25 16:15:32] INFO: PostgreSQL iniciado. Aguardando healthcheck...
+[2026-04-25 16:15:32] INFO: === AGUARDANDO POSTGRESQL ===
+[2026-04-25 16:15:32] INFO: Verificando healthcheck do container...
+[2026-04-25 16:15:42] INFO: Container PostgreSQL esta healthy (10s)
+[2026-04-25 16:15:47] INFO: PostgreSQL esta pronto para conexoes!
+[2026-04-25 16:15:47] INFO: === BENCHMARK PGVECTOR - Performance768D1M ===
+[2026-04-25 16:15:47] EXECUTANDO: vectordbbench pgvectorhnsw --user-name postgres --password postgres --host localhost --port 5434 --db-name psql_jurisprudencia --case-type Performance768D1M --m 16 --ef-construction 200 --ef-search 100 --maintenance-work-mem 16GB --max-parallel-workers 8 --db-label pgvector_1m_20260425_161531
+[2026-04-25 16:37:08] INFO: Benchmark pgvector concluido
+[2026-04-25 16:37:08] INFO: === PARANDO POSTGRESQL ===
+[2026-04-25 16:37:08] EXECUTANDO: docker-compose rm -sf postgres
+[2026-04-25 16:37:09] INFO: PostgreSQL parado
+[2026-04-25 16:37:09] INFO: 
+[2026-04-25 16:37:09] INFO: === INICIANDO ELASTICSEARCH ===
+[2026-04-25 16:37:09] INFO: Criando novo container Elasticsearch...
+[2026-04-25 16:37:09] INFO: Nota: Primeira inicialização pode levar 2-3 minutos
+[2026-04-25 16:37:09] EXECUTANDO: docker-compose up -d elasticsearch
+[2026-04-25 16:37:09] INFO: Elasticsearch iniciado. Aguardando healthcheck...
+[2026-04-25 16:37:09] INFO: === AGUARDANDO ELASTICSEARCH ===
+[2026-04-25 16:37:19] INFO: Elasticsearch esta pronto! (status: green, 10s)
+[2026-04-25 16:37:24] INFO: === BENCHMARK ELASTICSEARCH - Performance768D1M ===
+[2026-04-25 16:37:24] EXECUTANDO: vectordbbench elasticcloudhnsw --host localhost --port 9201 --scheme http --user elastic --password='' --case-type Performance768D1M --m 16 --ef-construction 200 --num-candidates 200 --number-of-shards 1 --number-of-replicas 0 --refresh-interval 30s --db-label es_1m_20260425_161531
+[2026-04-25 17:11:39] INFO: Benchmark Elasticsearch concluido
+[2026-04-25 17:11:39] INFO: === PARANDO ELASTICSEARCH ===
+[2026-04-25 17:11:39] EXECUTANDO: docker-compose rm -sf elasticsearch
+[2026-04-25 17:11:43] INFO: Elasticsearch parado
+[2026-04-25 17:11:43] INFO: 
+[2026-04-25 17:11:43] INFO: === INICIANDO OPENSEARCH ===
+[2026-04-25 17:11:43] INFO: Criando novo container OpenSearch...
+[2026-04-25 17:11:43] INFO: Nota: Primeira inicialização pode levar 2-3 minutos
+[2026-04-25 17:11:43] EXECUTANDO: docker-compose up -d opensearch
+[2026-04-25 17:11:43] INFO: OpenSearch iniciado. Aguardando healthcheck...
+[2026-04-25 17:11:43] INFO: === AGUARDANDO OPENSEARCH ===
+[2026-04-25 17:11:53] INFO: OpenSearch esta pronto! (status: green, 10s)
+[2026-04-25 17:11:59] INFO: === BENCHMARK OPENSEARCH - Performance768D1M ===
+[2026-04-25 17:11:59] EXECUTANDO: vectordbbench ossopensearch --host localhost --port 9200 --user admin --password admin --metric-type cosine --case-type Performance768D1M --m 16 --ef-construction 256 --ef-search 128 --engine faiss --number-of-shards 1 --number-of-replicas 0 --quantization-type None --db-label os_1m_20260425_161531
+[2026-04-25 17:43:49] INFO: Benchmark OpenSearch concluido
+[2026-04-25 17:43:49] INFO: === PARANDO OPENSEARCH ===
+[2026-04-25 17:43:49] EXECUTANDO: docker-compose rm -sf opensearch
+[2026-04-25 17:43:51] INFO: OpenSearch parado
+[2026-04-25 17:43:51] INFO: 
+[2026-04-25 17:43:51] INFO: === GERANDO RESUMO ===
+[2026-04-25 17:43:51] INFO: Resumo gerado: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524/summary.txt
+[2026-04-25 17:43:52] INFO: 
+[2026-04-25 17:43:52] INFO: ============================================================
+[2026-04-25 17:43:52] INFO: BENCHMARK CONCLUIDO!
+[2026-04-25 17:43:52] INFO: ============================================================
+[2026-04-25 17:43:52] INFO: Resultados em: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524
+[2026-04-25 17:43:52] INFO: Log completo: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524/benchmark.log
+[2026-04-25 17:43:52] INFO: ============================================================

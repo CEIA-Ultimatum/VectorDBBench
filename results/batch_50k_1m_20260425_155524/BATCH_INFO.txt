@@ -1,0 +1,6 @@
+Inicio: 2026-04-25T15:55:24-03:00
+Diretorio: /home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524
+Ordem: 50k (pgvector, elasticsearch, opensearch) -> 1m (idem)
+BATCH_DIR=/home/marcos/vectordbbench/results/batch_50k_1m_20260425_155524
+PID=367372
+FIM: 2026-04-25T17:43:52-03:00

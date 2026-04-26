@@ -1,0 +1,35 @@
+[2026-04-25 15:47:32] INFO: Diretorio de resultados: /home/marcos/vectordbbench/results/20260425_154729
+[2026-04-25 15:47:32] INFO: Arquivo de log: /home/marcos/vectordbbench/results/20260425_154729/benchmark.log
+[2026-04-25 15:47:32] INFO: 
+[2026-04-25 15:47:32] INFO: ============================================================
+[2026-04-25 15:47:32] INFO: EXECUTANDO DATASET: 50k
+[2026-04-25 15:47:32] INFO: CASE TYPE: Performance1536D50K
+[2026-04-25 15:47:32] INFO: DESCRICAO: 50K vetores, 1536 dim (OpenAI) - Teste rapido (~5 min)
+[2026-04-25 15:47:32] INFO: ============================================================
+[2026-04-25 15:47:32] INFO: === INICIANDO POSTGRESQL ===
+[2026-04-25 15:47:32] INFO: Criando novo container PostgreSQL...
+[2026-04-25 15:47:32] INFO: Nota: Primeira inicialização pode levar 2-3 minutos (download da imagem + setup)
+[2026-04-25 15:47:32] EXECUTANDO: docker-compose up -d postgres
+[2026-04-25 15:47:32] INFO: PostgreSQL iniciado. Aguardando healthcheck...
+[2026-04-25 15:47:32] INFO: === AGUARDANDO POSTGRESQL ===
+[2026-04-25 15:47:32] INFO: Verificando healthcheck do container...
+[2026-04-25 15:47:42] INFO: Container PostgreSQL esta healthy (10s)
+[2026-04-25 15:47:47] INFO: PostgreSQL esta pronto para conexoes!
+[2026-04-25 15:47:47] INFO: === BENCHMARK PGVECTOR - Performance1536D50K ===
+[2026-04-25 15:47:47] EXECUTANDO: vectordbbench pgvectorhnsw --user-name postgres --password postgres --host localhost --port 5434 --db-name psql_jurisprudencia --case-type Performance1536D50K --m 16 --ef-construction 128 --ef-search 128 --maintenance-work-mem 4GB --max-parallel-workers 4 --db-label pgvector_50k_20260425_154729
+[2026-04-25 15:53:29] INFO: Benchmark pgvector concluido
+[2026-04-25 15:53:29] INFO: === PARANDO POSTGRESQL ===
+[2026-04-25 15:53:29] EXECUTANDO: docker-compose rm -sf postgres
+[2026-04-25 15:53:30] INFO: PostgreSQL parado
+[2026-04-25 15:53:30] INFO: 
+[2026-04-25 15:53:30] INFO: === INICIANDO ELASTICSEARCH ===
+[2026-04-25 15:53:30] INFO: Criando novo container Elasticsearch...
+[2026-04-25 15:53:30] INFO: Nota: Primeira inicialização pode levar 2-3 minutos
+[2026-04-25 15:53:30] EXECUTANDO: docker-compose up -d elasticsearch
+[2026-04-25 15:53:30] INFO: Elasticsearch iniciado. Aguardando healthcheck...
+[2026-04-25 15:53:30] INFO: === AGUARDANDO ELASTICSEARCH ===
+[2026-04-25 15:53:40] INFO: Elasticsearch esta pronto! (status: green, 10s)
+[2026-04-25 15:53:45] INFO: === BENCHMARK ELASTICSEARCH - Performance1536D50K ===
+[2026-04-25 15:53:45] EXECUTANDO: vectordbbench elasticcloudhnsw --host localhost --port 9201 --scheme http --user elastic --password='' --case-type Performance1536D50K --m 16 --ef-construction 100 --num-candidates 100 --number-of-shards 1 --number-of-replicas 0 --refresh-interval 30s --db-label es_50k_20260425_154729
+[2026-04-25 15:54:17] AVISO: Script interrompido com erro (codigo: 1)
+[2026-04-25 15:54:17] INFO: Limpando containers...
