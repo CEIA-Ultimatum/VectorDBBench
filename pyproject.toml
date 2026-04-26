@@ -26,6 +26,7 @@ classifiers = [
 ]
 dependencies = [
     "click",
+    "PyYAML",
     "pytz",
     "streamlit>=1.47,<2",  # 1.47 fixes streamlit#11660
     "tqdm",
@@ -53,7 +54,7 @@ restful         = [ "flask" ]
 qdrant          = [ "qdrant-client" ]
 pinecone        = [ "pinecone" ]
 weaviate        = [ "weaviate-client" ]
-elastic         = [ "elasticsearch" ]
+elastic         = [ "elasticsearch>=8.0.0,<9" ]
 # For elastic and aliyun_elasticsearch
 
 pgvector        = [ "psycopg", "psycopg-binary", "pgvector" ]
@@ -78,9 +79,18 @@ polardb         = [ "PyMySQL" ]
 doris           = [ "doris-vector-search" ]
 turbopuffer     = [ "turbopuffer" ]
 zvec            = [ "zvec" ]
-endee           = [ "endee==0.1.10" ]
+# endee==0.1.10 exige pydantic==1.10.26, incompativel com o nucleo (pydantic>=2).
+# Para benchmark Endee, instale manualmente num ambiente separado ou acompanhe atualizacoes do pacote endee no PyPI.
 lindorm         = [ "opensearch-py" ]
 pinot           = [ "requests" ]
+# Extras usados pelo run_benchmarks_sequential.sh (Docker local)
+docker-bench    = [
+    "elasticsearch>=8.0.0,<9",
+    "psycopg",
+    "psycopg-binary",
+    "pgvector",
+    "opensearch-py",
+]
 
 [project.urls]
 Repository  = "https://github.com/zilliztech/VectorDBBench"

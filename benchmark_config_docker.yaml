@@ -1,0 +1,395 @@
+# ============================================================
+# CONFIGURACAO VECTORDBENCH - Docker Benchmark
+# Arquivo de configuracao YAML para benchmarks com containers
+# do banco-de-dados-jurisprudencia
+# ============================================================
+#
+# USO ALTERNATIVO (o script run_benchmarks_sequential.sh passa
+# parametros via CLI, mas este arquivo pode ser usado manualmente):
+#
+#   vectordbbench pgvectorhnsw --config-file benchmark_config_docker.yaml
+#
+# ============================================================
+
+# -----------------------------------------------------------
+# DATASET: 50K VETORES (Performance1536D50K)
+# Rapido (~5 min) - Ideal para testes iniciais
+# -----------------------------------------------------------
+pgvectorhnsw-50k:
+  db_label: pgvector_50k_docker
+  user_name: postgres
+  password: postgres
+  host: localhost
+  port: 5434
+  db_name: psql_jurisprudencia
+  case_type: Performance1536D50K
+  k: 100
+  m: 16
+  ef_construction: 128
+  ef_search: 128
+  maintenance_work_mem: "4GB"
+  max_parallel_workers: 4
+  num_concurrency: "1,5,10,20"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+elasticcloudhnsw-50k:
+  db_label: es_50k_docker
+  host: localhost
+  port: 9201
+  scheme: http
+  user: elastic
+  password: ""
+  case_type: Performance1536D50K
+  k: 100
+  m: 16
+  ef_construction: 100
+  num_candidates: 100
+  element_type: float
+  number_of_shards: 1
+  number_of_replicas: 0
+  refresh_interval: "30s"
+  merge_max_thread_count: 8
+  use_force_merge: true
+  use_routing: false
+  use_rescore: false
+  oversample_ratio: 2.0
+  num_concurrency: "1,5,10,20"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+ossopensearch-50k:
+  db_label: os_50k_docker
+  host: localhost
+  port: 9200
+  user: admin
+  password: admin
+  case_type: Performance1536D50K
+  k: 100
+  m: 16
+  ef_construction: 200
+  ef_search: 100
+  engine: faiss
+  quantization_type: fp32
+  number_of_shards: 1
+  number_of_replicas: 0
+  index_thread_qty: 4
+  refresh_interval: "30s"
+  force_merge_enabled: true
+  num_concurrency: "1,5,10,20"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+# -----------------------------------------------------------
+# DATASET: 500K VETORES (Performance1536D500K)
+# Medio (~20-30 min) - Benchmark padrao
+# -----------------------------------------------------------
+pgvectorhnsw-500k:
+  db_label: pgvector_500k_docker
+  user_name: postgres
+  password: postgres
+  host: localhost
+  port: 5434
+  db_name: psql_jurisprudencia
+  case_type: Performance1536D500K
+  k: 100
+  m: 16
+  ef_construction: 200
+  ef_search: 100
+  maintenance_work_mem: "8GB"
+  max_parallel_workers: 8
+  num_concurrency: "1,10,20,40"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+elasticcloudhnsw-500k:
+  db_label: es_500k_docker
+  host: localhost
+  port: 9201
+  scheme: http
+  user: elastic
+  password: ""
+  case_type: Performance1536D500K
+  k: 100
+  m: 16
+  ef_construction: 200
+  num_candidates: 200
+  element_type: float
+  number_of_shards: 1
+  number_of_replicas: 0
+  refresh_interval: "30s"
+  merge_max_thread_count: 8
+  use_force_merge: true
+  num_concurrency: "1,10,20,40"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+ossopensearch-500k:
+  db_label: os_500k_docker
+  host: localhost
+  port: 9200
+  user: admin
+  password: admin
+  case_type: Performance1536D500K
+  k: 100
+  m: 16
+  ef_construction: 256
+  ef_search: 128
+  engine: faiss
+  quantization_type: fp32
+  number_of_shards: 1
+  number_of_replicas: 0
+  index_thread_qty: 4
+  number_of_indexing_clients: 4
+  refresh_interval: "30s"
+  force_merge_enabled: true
+  num_concurrency: "1,10,20,40"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+# -----------------------------------------------------------
+# DATASET: 1M VETORES 768 DIM (Performance768D1M)
+# Padrao (~30-60 min) - Benchmark completo
+# -----------------------------------------------------------
+pgvectorhnsw-1m:
+  db_label: pgvector_1m_docker
+  user_name: postgres
+  password: postgres
+  host: localhost
+  port: 5434
+  db_name: psql_jurisprudencia
+  case_type: Performance768D1M
+  k: 100
+  m: 16
+  ef_construction: 200
+  ef_search: 100
+  maintenance_work_mem: "16GB"
+  max_parallel_workers: 8
+  num_concurrency: "1,10,20,40,60"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+elasticcloudhnsw-1m:
+  db_label: es_1m_docker
+  host: localhost
+  port: 9201
+  scheme: http
+  user: elastic
+  password: ""
+  case_type: Performance768D1M
+  k: 100
+  m: 16
+  ef_construction: 200
+  num_candidates: 200
+  element_type: float
+  number_of_shards: 1
+  number_of_replicas: 0
+  refresh_interval: "30s"
+  merge_max_thread_count: 8
+  use_force_merge: true
+  num_concurrency: "1,10,20,40,60"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+ossopensearch-1m:
+  db_label: os_1m_docker
+  host: localhost
+  port: 9200
+  user: admin
+  password: admin
+  case_type: Performance768D1M
+  k: 100
+  m: 16
+  ef_construction: 256
+  ef_search: 128
+  engine: faiss
+  quantization_type: fp32
+  number_of_shards: 1
+  number_of_replicas: 0
+  index_thread_qty: 4
+  number_of_indexing_clients: 4
+  refresh_interval: "30s"
+  force_merge_enabled: true
+  num_concurrency: "1,10,20,40,60"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+# -----------------------------------------------------------
+# DATASET: 1M VETORES 1024 DIM (Performance1024D1M - Bioasq)
+# Especializado (~30-60 min) - Dataset juridico/biomedico
+# -----------------------------------------------------------
+pgvectorhnsw-1024d:
+  db_label: pgvector_1024d_docker
+  user_name: postgres
+  password: postgres
+  host: localhost
+  port: 5434
+  db_name: psql_jurisprudencia
+  case_type: Performance1024D1M
+  k: 100
+  m: 16
+  ef_construction: 200
+  ef_search: 100
+  maintenance_work_mem: "16GB"
+  max_parallel_workers: 8
+  num_concurrency: "1,10,20,40,60"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+elasticcloudhnsw-1024d:
+  db_label: es_1024d_docker
+  host: localhost
+  port: 9201
+  scheme: http
+  user: elastic
+  password: ""
+  case_type: Performance1024D1M
+  k: 100
+  m: 16
+  ef_construction: 200
+  num_candidates: 200
+  element_type: float
+  number_of_shards: 1
+  number_of_replicas: 0
+  refresh_interval: "30s"
+  merge_max_thread_count: 8
+  use_force_merge: true
+  num_concurrency: "1,10,20,40,60"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+ossopensearch-1024d:
+  db_label: os_1024d_docker
+  host: localhost
+  port: 9200
+  user: admin
+  password: admin
+  case_type: Performance1024D1M
+  k: 100
+  m: 16
+  ef_construction: 256
+  ef_search: 128
+  engine: faiss
+  quantization_type: fp32
+  number_of_shards: 1
+  number_of_replicas: 0
+  index_thread_qty: 4
+  number_of_indexing_clients: 4
+  refresh_interval: "30s"
+  force_merge_enabled: true
+  num_concurrency: "1,10,20,40,60"
+  concurrency_duration: 30
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+# -----------------------------------------------------------
+# DATASET: 10M VETORES (Performance768D10M)
+# Grande (~4-8 horas) - Teste de capacidade
+# ATENCAO: Requer muita memoria e tempo!
+# -----------------------------------------------------------
+pgvectorhnsw-10m:
+  db_label: pgvector_10m_docker
+  user_name: postgres
+  password: postgres
+  host: localhost
+  port: 5434
+  db_name: psql_jurisprudencia
+  case_type: Performance768D10M
+  k: 100
+  m: 16
+  ef_construction: 256
+  ef_search: 128
+  maintenance_work_mem: "64GB"
+  max_parallel_workers: 16
+  num_concurrency: "1,10,20,40,60,80"
+  concurrency_duration: 60
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+elasticcloudhnsw-10m:
+  db_label: es_10m_docker
+  host: localhost
+  port: 9201
+  scheme: http
+  user: elastic
+  password: ""
+  case_type: Performance768D10M
+  k: 100
+  m: 16
+  ef_construction: 256
+  num_candidates: 128
+  element_type: float
+  number_of_shards: 3
+  number_of_replicas: 0
+  refresh_interval: "30s"
+  merge_max_thread_count: 8
+  use_force_merge: true
+  num_concurrency: "1,10,20,40,60,80"
+  concurrency_duration: 60
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true
+
+ossopensearch-10m:
+  db_label: os_10m_docker
+  host: localhost
+  port: 9200
+  user: admin
+  password: admin
+  case_type: Performance768D10M
+  k: 100
+  m: 16
+  ef_construction: 256
+  ef_search: 128
+  engine: faiss
+  quantization_type: fp32
+  number_of_shards: 3
+  number_of_replicas: 0
+  index_thread_qty: 8
+  number_of_indexing_clients: 10
+  refresh_interval: "30s"
+  force_merge_enabled: true
+  num_concurrency: "1,10,20,40,60,80"
+  concurrency_duration: 60
+  drop_old: true
+  load: true
+  search_serial: true
+  search_concurrent: true

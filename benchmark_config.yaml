@@ -1,0 +1,602 @@
+# Configuração de Benchmark para VectorDBBench
+# Testes para pgvector, OpenSearch e Elasticsearch
+# Datasets: 50K, 500K, 1M, 5M, 10M vetores
+
+# ============================================================
+# PGVECTOR - Testes com HNSW (índice mais popular)
+# ============================================================
+pgvectorhnsw:
+  # Teste 1: Dataset pequeno - 50K vetores (OpenAI 1536 dim)
+  # Uso: Validação rápida, desenvolvimento
+  - db_label: pgvector-50k-hnsw
+    user_name: ${PG_USER:-postgres}
+    password: ${PG_PASSWORD:-postgres}
+    host: ${PG_HOST:-localhost}
+    port: ${PG_PORT:-5432}
+    db_name: ${PG_DB:-vectordb}
+    case_type: Performance1536D50K
+    k: 100
+    m: 16
+    ef_construction: 128
+    ef_search: 128
+    maintenance_work_mem: "4GB"
+    max_parallel_workers: 4
+    num_concurrency: "1,5,10,20"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 2: Dataset médio - 500K vetores (OpenAI 1536 dim)
+  # Uso: Benchmark padrão
+  - db_label: pgvector-500k-hnsw
+    user_name: ${PG_USER:-postgres}
+    password: ${PG_PASSWORD:-postgres}
+    host: ${PG_HOST:-localhost}
+    port: ${PG_PORT:-5432}
+    db_name: ${PG_DB:-vectordb}
+    case_type: Performance1536D500K
+    k: 100
+    m: 16
+    ef_construction: 200
+    ef_search: 100
+    maintenance_work_mem: "8GB"
+    max_parallel_workers: 8
+    num_concurrency: "1,10,20,40"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 3: Dataset médio - 1M vetores (Cohere 768 dim)
+  # Uso: Benchmark padrão
+  - db_label: pgvector-1m-hnsw
+    user_name: ${PG_USER:-postgres}
+    password: ${PG_PASSWORD:-postgres}
+    host: ${PG_HOST:-localhost}
+    port: ${PG_PORT:-5432}
+    db_name: ${PG_DB:-vectordb}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 200
+    ef_search: 100
+    maintenance_work_mem: "16GB"
+    max_parallel_workers: 8
+    num_concurrency: "1,10,20,40,60"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 4: Dataset grande - 5M vetores (OpenAI 1536 dim)
+  # Uso: Teste de capacidade
+  - db_label: pgvector-5m-hnsw
+    user_name: ${PG_USER:-postgres}
+    password: ${PG_PASSWORD:-postgres}
+    host: ${PG_HOST:-localhost}
+    port: ${PG_PORT:-5432}
+    db_name: ${PG_DB:-vectordb}
+    case_type: Performance1536D5M
+    k: 100
+    m: 16
+    ef_construction: 256
+    ef_search: 128
+    maintenance_work_mem: "32GB"
+    max_parallel_workers: 16
+    num_concurrency: "1,10,20,40,60,80"
+    concurrency_duration: 60
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 5: Dataset grande - 10M vetores (Cohere 768 dim)
+  # Uso: Teste de capacidade máxima
+  - db_label: pgvector-10m-hnsw
+    user_name: ${PG_USER:-postgres}
+    password: ${PG_PASSWORD:-postgres}
+    host: ${PG_HOST:-localhost}
+    port: ${PG_PORT:-5432}
+    db_name: ${PG_DB:-vectordb}
+    case_type: Performance768D10M
+    k: 100
+    m: 16
+    ef_construction: 256
+    ef_search: 128
+    maintenance_work_mem: "64GB"
+    max_parallel_workers: 16
+    num_concurrency: "1,10,20,40,60,80"
+    concurrency_duration: 60
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 6: Quantização Binária (Bit) - Mais rápido e compacto
+  # Uso: Comparação de performance com quantização
+  - db_label: pgvector-1m-hnsw-bit
+    user_name: ${PG_USER:-postgres}
+    password: ${PG_PASSWORD:-postgres}
+    host: ${PG_HOST:-localhost}
+    port: ${PG_PORT:-5432}
+    db_name: ${PG_DB:-vectordb}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 128
+    ef_search: 128
+    quantization_type: bit
+    table_quantization_type: bit
+    reranking: true
+    reranking_metric: COSINE
+    quantized_fetch_limit: 128
+    maintenance_work_mem: "16GB"
+    max_parallel_workers: 8
+    num_concurrency: "1,10,20,40"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 7: Halfvec (FP16) - Economia de memória
+  - db_label: pgvector-1m-hnsw-halfvec
+    user_name: ${PG_USER:-postgres}
+    password: ${PG_PASSWORD:-postgres}
+    host: ${PG_HOST:-localhost}
+    port: ${PG_PORT:-5432}
+    db_name: ${PG_DB:-vectordb}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 128
+    ef_search: 100
+    quantization_type: halfvec
+    table_quantization_type: halfvec
+    maintenance_work_mem: "16GB"
+    max_parallel_workers: 8
+    num_concurrency: "1,10,20,40"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 8: IVFFlat - Alternativa ao HNSW
+  - db_label: pgvector-1m-ivfflat
+    user_name: ${PG_USER:-postgres}
+    password: ${PG_PASSWORD:-postgres}
+    host: ${PG_HOST:-localhost}
+    port: ${PG_PORT:-5432}
+    db_name: ${PG_DB:-vectordb}
+    case_type: Performance768D1M
+    k: 100
+    lists: 1000
+    probes: 10
+    quantization_type: none
+    maintenance_work_mem: "16GB"
+    max_parallel_workers: 8
+    num_concurrency: "1,10,20,40"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+# ============================================================
+# ELASTICSEARCH - Testes com diferentes quantizações
+# ============================================================
+elasticcloudhnsw:
+  # Teste 1: HNSW Padrão - 50K vetores
+  - db_label: elastic-50k-hnsw
+    cloud_id: ${ES_CLOUD_ID:-}
+    host: ${ES_HOST:-localhost}
+    port: ${ES_PORT:-9200}
+    scheme: ${ES_SCHEME:-https}
+    user: ${ES_USER:-elastic}
+    password: ${ES_PASSWORD:-changeme}
+    case_type: Performance1536D50K
+    k: 100
+    m: 16
+    ef_construction: 100
+    num_candidates: 100
+    element_type: float
+    number_of_shards: 1
+    number_of_replicas: 0
+    refresh_interval: "30s"
+    merge_max_thread_count: 8
+    use_force_merge: true
+    use_routing: false
+    use_rescore: false
+    oversample_ratio: 2.0
+    num_concurrency: "1,5,10,20"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 2: HNSW Padrão - 1M vetores
+  - db_label: elastic-1m-hnsw
+    cloud_id: ${ES_CLOUD_ID:-}
+    host: ${ES_HOST:-localhost}
+    port: ${ES_PORT:-9200}
+    scheme: ${ES_SCHEME:-https}
+    user: ${ES_USER:-elastic}
+    password: ${ES_PASSWORD:-changeme}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 100
+    num_candidates: 100
+    element_type: float
+    number_of_shards: 1
+    number_of_replicas: 0
+    refresh_interval: "30s"
+    merge_max_thread_count: 8
+    use_force_merge: true
+    use_routing: false
+    use_rescore: false
+    oversample_ratio: 2.0
+    num_concurrency: "1,10,20,40,60"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 3: HNSW com Quantização INT8
+  - db_label: elastic-1m-int8
+    cloud_id: ${ES_CLOUD_ID:-}
+    host: ${ES_HOST:-localhost}
+    port: ${ES_PORT:-9200}
+    scheme: ${ES_SCHEME:-https}
+    user: ${ES_USER:-elastic}
+    password: ${ES_PASSWORD:-changeme}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 200
+    num_candidates: 200
+    element_type: float
+    number_of_shards: 1
+    number_of_replicas: 0
+    refresh_interval: "30s"
+    merge_max_thread_count: 8
+    use_force_merge: true
+    use_routing: false
+    use_rescore: false
+    oversample_ratio: 2.0
+    num_concurrency: "1,10,20,40,60"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 4: HNSW com Quantização INT4
+  - db_label: elastic-1m-int4
+    cloud_id: ${ES_CLOUD_ID:-}
+    host: ${ES_HOST:-localhost}
+    port: ${ES_PORT:-9200}
+    scheme: ${ES_SCHEME:-https}
+    user: ${ES_USER:-elastic}
+    password: ${ES_PASSWORD:-changeme}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 200
+    num_candidates: 200
+    element_type: float
+    number_of_shards: 1
+    number_of_replicas: 0
+    refresh_interval: "30s"
+    merge_max_thread_count: 8
+    use_force_merge: true
+    use_routing: false
+    use_rescore: true
+    oversample_ratio: 2.0
+    num_concurrency: "1,10,20,40,60"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 5: HNSW com BBQ (Binary Quantization)
+  - db_label: elastic-1m-bbq
+    cloud_id: ${ES_CLOUD_ID:-}
+    host: ${ES_HOST:-localhost}
+    port: ${ES_PORT:-9200}
+    scheme: ${ES_SCHEME:-https}
+    user: ${ES_USER:-elastic}
+    password: ${ES_PASSWORD:-changeme}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 200
+    num_candidates: 200
+    element_type: float
+    number_of_shards: 1
+    number_of_replicas: 0
+    refresh_interval: "30s"
+    merge_max_thread_count: 8
+    use_force_merge: true
+    use_routing: true
+    use_rescore: false
+    oversample_ratio: 2.0
+    num_concurrency: "1,10,20,40,60"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 6: Dataset grande - 5M vetores
+  - db_label: elastic-5m-hnsw
+    cloud_id: ${ES_CLOUD_ID:-}
+    host: ${ES_HOST:-localhost}
+    port: ${ES_PORT:-9200}
+    scheme: ${ES_SCHEME:-https}
+    user: ${ES_USER:-elastic}
+    password: ${ES_PASSWORD:-changeme}
+    case_type: Performance1536D5M
+    k: 100
+    m: 16
+    ef_construction: 256
+    num_candidates: 128
+    element_type: float
+    number_of_shards: 3
+    number_of_replicas: 0
+    refresh_interval: "30s"
+    merge_max_thread_count: 8
+    use_force_merge: true
+    use_routing: false
+    use_rescore: false
+    oversample_ratio: 2.0
+    num_concurrency: "1,10,20,40,60,80"
+    concurrency_duration: 60
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+# ============================================================
+# OPENSEARCH - Testes OSS (self-hosted)
+# ============================================================
+ossopensearch:
+  # Teste 1: HNSW - 50K vetores
+  - db_label: opensearch-50k-hnsw
+    host: ${OS_HOST:-localhost}
+    port: ${OS_PORT:-9200}
+    user: ${OS_USER:-admin}
+    password: ${OS_PASSWORD:-admin}
+    case_type: Performance1536D50K
+    k: 100
+    m: 16
+    ef_construction: 200
+    ef_search: 100
+    engine: faiss
+    quantization_type: fp32
+    number_of_shards: 1
+    number_of_replicas: 0
+    index_thread_qty: 4
+    refresh_interval: "30s"
+    force_merge_enabled: true
+    num_concurrency: "1,5,10,20"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 2: HNSW - 1M vetores
+  - db_label: opensearch-1m-hnsw
+    host: ${OS_HOST:-localhost}
+    port: ${OS_PORT:-9200}
+    user: ${OS_USER:-admin}
+    password: ${OS_PASSWORD:-admin}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 200
+    ef_search: 100
+    engine: faiss
+    quantization_type: fp32
+    number_of_shards: 1
+    number_of_replicas: 0
+    index_thread_qty: 4
+    number_of_indexing_clients: 4
+    refresh_interval: "30s"
+    force_merge_enabled: true
+    num_concurrency: "1,10,20,40,60"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 3: HNSW com Binary Quantization (BQ)
+  - db_label: opensearch-1m-bq
+    host: ${OS_HOST:-localhost}
+    port: ${OS_PORT:-9200}
+    user: ${OS_USER:-admin}
+    password: ${OS_PASSWORD:-admin}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 256
+    ef_search: 128
+    engine: faiss
+    quantization_type: bq
+    ondisk: true
+    number_of_shards: 1
+    number_of_replicas: 0
+    index_thread_qty: 4
+    number_of_indexing_clients: 4
+    refresh_interval: "30s"
+    force_merge_enabled: true
+    num_concurrency: "1,10,20,40,60"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 4: Lucene Engine (alternativa ao FAISS)
+  - db_label: opensearch-1m-lucene
+    host: ${OS_HOST:-localhost}
+    port: ${OS_PORT:-9200}
+    user: ${OS_USER:-admin}
+    password: ${OS_PASSWORD:-admin}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 256
+    ef_search: 128
+    engine: lucene
+    quantization_type: fp32
+    number_of_shards: 1
+    number_of_replicas: 0
+    index_thread_qty: 4
+    number_of_indexing_clients: 4
+    refresh_interval: "30s"
+    force_merge_enabled: true
+    num_concurrency: "1,10,20,40,60"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 5: Dataset grande - 5M vetores
+  - db_label: opensearch-5m-hnsw
+    host: ${OS_HOST:-localhost}
+    port: ${OS_PORT:-9200}
+    user: ${OS_USER:-admin}
+    password: ${OS_PASSWORD:-admin}
+    case_type: Performance1536D5M
+    k: 100
+    m: 16
+    ef_construction: 256
+    ef_search: 128
+    engine: faiss
+    quantization_type: fp32
+    number_of_shards: 3
+    number_of_replicas: 0
+    index_thread_qty: 8
+    number_of_indexing_clients: 10
+    refresh_interval: "30s"
+    force_merge_enabled: true
+    num_concurrency: "1,10,20,40,60,80"
+    concurrency_duration: 60
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+# ============================================================
+# AWS OPENSEARCH - Testes para serviço gerenciado AWS
+# ============================================================
+awsopensearch:
+  # Teste 1: HNSW - 1M vetores
+  - db_label: aws-opensearch-1m-hnsw
+    host: ${AWS_OS_HOST:-}
+    port: ${AWS_OS_PORT:-443}
+    user: ${AWS_OS_USER:-}
+    password: ${AWS_OS_PASSWORD:-}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 256
+    engine: faiss
+    quantization_type: fp32
+    number_of_shards: 1
+    number_of_replicas: 0
+    index_thread_qty: 4
+    number_of_indexing_clients: 4
+    number_of_segments: 1
+    refresh_interval: "30s"
+    force_merge_enabled: true
+    num_concurrency: "1,10,20,40,60"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  # Teste 2: Com Binary Quantization
+  - db_label: aws-opensearch-1m-bq
+    host: ${AWS_OS_HOST:-}
+    port: ${AWS_OS_PORT:-443}
+    user: ${AWS_OS_USER:-}
+    password: ${AWS_OS_PASSWORD:-}
+    case_type: Performance768D1M
+    k: 100
+    m: 16
+    ef_construction: 256
+    engine: faiss
+    quantization_type: bq
+    ondisk: true
+    number_of_shards: 1
+    number_of_replicas: 0
+    index_thread_qty: 4
+    number_of_indexing_clients: 4
+    refresh_interval: "30s"
+    force_merge_enabled: true
+    num_concurrency: "1,10,20,40,60"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+# ============================================================
+# TESTES COM FILTROS (Performance com filtragem)
+# ============================================================
+
+# pgvector com filtros Int (1% e 99%)
+pgvectorhnsw-filter:
+  - db_label: pgvector-1m-filter-1p
+    user_name: ${PG_USER:-postgres}
+    password: ${PG_PASSWORD:-postgres}
+    host: ${PG_HOST:-localhost}
+    port: ${PG_PORT:-5432}
+    db_name: ${PG_DB:-vectordb}
+    case_type: Performance768D1M1P
+    k: 100
+    m: 16
+    ef_construction: 200
+    ef_search: 100
+    maintenance_work_mem: "16GB"
+    max_parallel_workers: 8
+    num_concurrency: "1,10,20,40"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
+
+  - db_label: pgvector-1m-filter-99p
+    user_name: ${PG_USER:-postgres}
+    password: ${PG_PASSWORD:-postgres}
+    host: ${PG_HOST:-localhost}
+    port: ${PG_PORT:-5432}
+    db_name: ${PG_DB:-vectordb}
+    case_type: Performance768D1M99P
+    k: 100
+    m: 16
+    ef_construction: 200
+    ef_search: 100
+    maintenance_work_mem: "16GB"
+    max_parallel_workers: 8
+    num_concurrency: "1,10,20,40"
+    concurrency_duration: 30
+    drop_old: true
+    load: true
+    search_serial: true
+    search_concurrent: true
