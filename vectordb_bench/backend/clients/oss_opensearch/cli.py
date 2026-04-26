@@ -174,6 +174,8 @@ def OSSOpenSearch(**parameters: Unpack[OSSOpenSearchHNSWTypedDict]):
             quantization_type=OSSOpenSearchQuantization(parameters["quantization_type"]),
             confidence_interval=parameters["confidence_interval"],
             clip=parameters["clip"],
+            # parse_metric() exige metric_type_name (MetricType enum key: L2, COSINE, IP)
+            metric_type_name=parameters["metric_type"].upper(),
         ),
         **parameters,
     )

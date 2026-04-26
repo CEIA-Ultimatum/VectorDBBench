@@ -654,10 +654,19 @@ class OSSOpenSearch(VectorDB):
             f"Successfully updated cluster index thread qty to {self.case_config.index_thread_qty_during_force_merge}"
         )
         settings_manager.apply_cluster_settings(cluster_settings, log_message_cluster)
-        log.info("Updating the graph threshold to ensure that during merge we can do graph creation.")
-        log_message_index = "Successfully updated index approximate threshold to 0"
-        output = settings_manager.apply_index_settings({"knn.advanced.approximate_threshold": "0"}, log_message_index)
-        log.info(f"response of updating setting is: {output}")
+        cluster_version = self._get_cluster_version(self.client)
+        # knn.advanced.approximate_threshold exists only in OpenSearch 3.0+ (see VERSION_SPECIFIC_SETTING_RULES).
+        if cluster_version >= Version("3.0"):
+            log.info("Updating the graph threshold to ensure that during merge we can do graph creation.")
+            log_message_index = "Successfully updated index approximate threshold to 0"
+            output = settings_manager.apply_index_settings(
+                {"knn.advanced.approximate_threshold": "0"}, log_message_index
+            )
+            log.info(f"response of updating setting is: {output}")
+        else:
+            log.info(
+                f"Skipping knn.advanced.approximate_threshold (not supported on OpenSearch {cluster_version}; need 3.0+)"
+            )
 
         log.info(f"Starting force merge for index {self.index_name}")
         segments = self.case_config.number_of_segments

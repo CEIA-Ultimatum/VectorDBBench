@@ -206,6 +206,13 @@ class OSSOpenSearchIndexConfig(BaseModel, DBCaseConfig):
     def index_param(self) -> dict:
         resolved_engine = self.resolved_engine
         space_type = self.parse_metric()
+        # FAISS knn in OpenSearch rejects cosinesimil; innerproduct matches cosine for L2-normalized vectors.
+        if resolved_engine == OSSOS_Engine.faiss and space_type == "cosinesimil":
+            log.info(
+                "FAISS engine: mapping space_type cosinesimil -> innerproduct "
+                "(cosine-equivalent for normalized embeddings)."
+            )
+            space_type = "innerproduct"
 
         log.info(
             f"Index configuration - "
