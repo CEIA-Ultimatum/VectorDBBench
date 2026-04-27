@@ -524,6 +524,16 @@ stop_opensearch() {
 # ============================================================================
 # FUNCOES DE BENCHMARK
 # ============================================================================
+# Criterios de alinhamento (comparacao justa entre ES, OpenSearch e pgvector):
+# - Mesmos M e ef_construction por faixa de dataset (ver case em cada funcao).
+# - Mesma "largura" de busca HNSW: pgvector --ef-search = ES --num-candidates =
+#   OpenSearch --ef-search (inclui 10m; todos 200 neste script).
+# - Sem quantizacao adicional no pgvector: --quantization-type/--table-quantization-type none
+#   (mapeia para tipo vector float, como float32 no ES/OS sem quant in-memory).
+# - OpenSearch: engine faiss in-memory alinhado ao uso tipico do knn-plugin; threads
+#   de indexacao/force merge explicitos para nao ficar no default baixo da CLI.
+# Parametros so de build (maintenance_work_mem, max_parallel_workers no pgvector;
+# merge_max_thread_count no ES) nao tem equivalente 1:1 entre motores.
 
 run_pgvector_benchmark() {
     local dataset_key="$1"
@@ -538,7 +548,8 @@ run_pgvector_benchmark() {
     # Parametros baseados no dataset
     local m=16
     local ef_construction=128
-    local ef_search=128
+    # Alinhado a num_candidates (ES) / ef_search (OpenSearch) em todo o script
+    local ef_search=200
     local maintenance_work_mem="4GB"
     local max_parallel_workers=4
     
@@ -546,13 +557,13 @@ run_pgvector_benchmark() {
     case "$dataset_key" in
         "1m"|"1024d")
             ef_construction=200
-            ef_search=100
+            ef_search=200
             maintenance_work_mem="16GB"
             max_parallel_workers=8
             ;;
         "10m")
             ef_construction=256
-            ef_search=128
+            ef_search=200
             maintenance_work_mem="64GB"
             max_parallel_workers=16
             ;;
@@ -569,6 +580,9 @@ run_pgvector_benchmark() {
     cmd="${cmd} --m ${m}"
     cmd="${cmd} --ef-construction ${ef_construction}"
     cmd="${cmd} --ef-search ${ef_search}"
+    # none -> tipo vector float (equivalente a vetores completos; evita halfvec/bit)
+    cmd="${cmd} --quantization-type none"
+    cmd="${cmd} --table-quantization-type none"
     cmd="${cmd} --maintenance-work-mem ${maintenance_work_mem}"
     cmd="${cmd} --max-parallel-workers ${max_parallel_workers}"
     cmd="${cmd} --db-label pgvector_${dataset_key}_${TIMESTAMP}"
@@ -597,7 +611,7 @@ run_elasticsearch_benchmark() {
     # num_candidates equivalente a ef_search no OpenSearch.
     local m=16
     local ef_construction=128
-    local num_candidates=128
+    local num_candidates=200
     local num_shards=1
     
     # Ajustar parametros para datasets maiores
@@ -608,7 +622,7 @@ run_elasticsearch_benchmark() {
             ;;
         "10m")
             ef_construction=256
-            num_candidates=128
+            num_candidates=200
             num_shards=3
             ;;
     esac
@@ -624,9 +638,15 @@ run_elasticsearch_benchmark() {
     cmd="${cmd} --m ${m}"
     cmd="${cmd} --ef-construction ${ef_construction}"
     cmd="${cmd} --num-candidates ${num_candidates}"
+    # float32: alinhado ao pgvector (vector float) e OS (sem quantizacao)
+    cmd="${cmd} --element-type float"
     cmd="${cmd} --number-of-shards ${num_shards}"
     cmd="${cmd} --number-of-replicas 0"
     cmd="${cmd} --refresh-interval 30s"
+    # Explicito: garante force merge ligado (post-load graph optimization)
+    cmd="${cmd} --use-force-merge True"
+    # 8 threads de merge: simetrico ao index_thread_qty_during_force_merge do OS
+    cmd="${cmd} --merge-max-thread-count 8"
     cmd="${cmd} --db-label es_${dataset_key}_${TIMESTAMP}"
     
     run_cmd "$cmd"
@@ -649,14 +669,15 @@ run_opensearch_benchmark() {
     local os_results="${RESULTS_DIR}/opensearch_${dataset_key}"
     mkdir -p "$os_results"
     
-    # HNSW alinhado a run_elasticsearch_benchmark: engine lucene aproxima HNSW nativo
-    # do Lucene/Elasticsearch; ef_search = num_candidates no run ES.
+    # HNSW alinhado a run_elasticsearch_benchmark; engine faiss in-memory costuma
+    # ter melhor throughput que lucene neste cliente; ef_search = num_candidates no ES.
     local m=16
     local ef_construction=128
-    local ef_search=128
-    # lucene: mais comparavel ao HNSW dense_vector do ES do que o backend faiss
-    local engine="lucene"
+    local ef_search=200
+    local engine="faiss"
     local num_shards=1
+    local index_threads=8
+    local index_threads_force_merge=8
     
     # Ajustar parametros para datasets maiores
     case "$dataset_key" in
@@ -666,7 +687,7 @@ run_opensearch_benchmark() {
             ;;
         "10m")
             ef_construction=256
-            ef_search=128
+            ef_search=200
             num_shards=3
             ;;
     esac
@@ -684,6 +705,8 @@ run_opensearch_benchmark() {
     cmd="${cmd} --ef-construction ${ef_construction}"
     cmd="${cmd} --ef-search ${ef_search}"
     cmd="${cmd} --engine ${engine}"
+    cmd="${cmd} --index-thread-qty ${index_threads}"
+    cmd="${cmd} --index_thread_qty_during_force_merge ${index_threads_force_merge}"
     cmd="${cmd} --number-of-shards ${num_shards}"
     cmd="${cmd} --number-of-replicas 0"
     # Mesmo refresh do Elasticsearch (30s) para carga/visibilidade comparavel
