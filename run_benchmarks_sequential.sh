@@ -593,10 +593,11 @@ run_elasticsearch_benchmark() {
     local es_results="${RESULTS_DIR}/elasticsearch_${dataset_key}"
     mkdir -p "$es_results"
     
-    # Parametros baseados no dataset
+    # HNSW alinhado a run_opensearch_benchmark: mesmo M, ef_construction, e
+    # num_candidates equivalente a ef_search no OpenSearch.
     local m=16
-    local ef_construction=100
-    local num_candidates=100
+    local ef_construction=128
+    local num_candidates=128
     local num_shards=1
     
     # Ajustar parametros para datasets maiores
@@ -648,18 +649,20 @@ run_opensearch_benchmark() {
     local os_results="${RESULTS_DIR}/opensearch_${dataset_key}"
     mkdir -p "$os_results"
     
-    # Parametros baseados no dataset
+    # HNSW alinhado a run_elasticsearch_benchmark: engine lucene aproxima HNSW nativo
+    # do Lucene/Elasticsearch; ef_search = num_candidates no run ES.
     local m=16
-    local ef_construction=200
-    local ef_search=100
-    local engine="faiss"
+    local ef_construction=128
+    local ef_search=128
+    # lucene: mais comparavel ao HNSW dense_vector do ES do que o backend faiss
+    local engine="lucene"
     local num_shards=1
     
     # Ajustar parametros para datasets maiores
     case "$dataset_key" in
         "1m"|"1024d")
-            ef_construction=256
-            ef_search=128
+            ef_construction=200
+            ef_search=200
             ;;
         "10m")
             ef_construction=256
@@ -683,6 +686,8 @@ run_opensearch_benchmark() {
     cmd="${cmd} --engine ${engine}"
     cmd="${cmd} --number-of-shards ${num_shards}"
     cmd="${cmd} --number-of-replicas 0"
+    # Mesmo refresh do Elasticsearch (30s) para carga/visibilidade comparavel
+    cmd="${cmd} --refresh-interval 30s"
     # ossopensearch: apenas None | LuceneSQ | FaissSQfp16 (sem quantizacao in-memory = None)
     cmd="${cmd} --quantization-type None"
     cmd="${cmd} --db-label os_${dataset_key}_${TIMESTAMP}"
