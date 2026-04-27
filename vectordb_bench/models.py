@@ -22,6 +22,43 @@ from .metric import Metric
 
 log = logging.getLogger(__name__)
 
+# write_db_file omite password e api_key no JSON; ao reler, o modelo ainda
+# exige o campo. DBConfig.not_empty_field rejeita "", por isso usamos um
+# placeholder não vazio (só para visualização; não re-liga ao DB).
+_OMITTED_DB_SECRET_PLACEHOLDER = " "
+
+def _db_config_dict_for_reload(config_cls: type, raw: dict | None) -> dict:
+    out = dict(raw or {})
+    for key in ("password", "api_key"):
+        if key in out:
+            continue
+        field_info = getattr(config_cls, "model_fields", {}).get(key)
+        if field_info is not None and field_info.is_required():
+            out[key] = _OMITTED_DB_SECRET_PLACEHOLDER
+
+    # Gravação mínima do result JSON às vezes só tem db_label/version/note;
+    # ElasticCloudConfig exige cloud_id *ou* host (model_validator).
+    if config_cls.__name__ == "ElasticCloudConfig":
+        _elastic_reload_host_or_cloud_id(out)
+    return out
+
+
+def _elastic_reload_host_or_cloud_id(out: dict) -> None:
+    raw_host = out.get("host", "")
+    host = raw_host if isinstance(raw_host, str) else (str(raw_host) if raw_host is not None else "")
+    has_host = bool(host.strip())
+
+    raw_cid = out.get("cloud_id")
+    has_cid = False
+    if isinstance(raw_cid, str):
+        has_cid = bool(raw_cid.strip())
+    elif raw_cid is not None and not isinstance(raw_cid, (dict, list)):
+        s = str(raw_cid).strip()
+        has_cid = bool(s and s.lower() != "null")
+
+    if not has_cid and not has_host:
+        out["host"] = _OMITTED_DB_SECRET_PLACEHOLDER
+
 
 class LoadTimeoutError(TimeoutError):
     def __init__(self, duration: int):
@@ -347,7 +384,7 @@ class TestResult(BaseModel):
                 case_config = task_config.get("case_config")
                 db = DB(task_config.get("db"))
 
-                task_config["db_config"] = db.config_cls(**task_config["db_config"])
+                task_config["db_config"] = db.config_cls(**_db_config_dict_for_reload(db.config_cls, task_config.get("db_config")))
 
                 # Safely instantiate DBCaseConfig (fallback to EmptyDBCaseConfig on None)
                 raw_case_cfg = task_config.get("db_case_config") or {}

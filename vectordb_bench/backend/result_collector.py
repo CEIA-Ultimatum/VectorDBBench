@@ -14,8 +14,12 @@ class ResultCollector:
         if not result_dir.exists() or len(list(result_dir.rglob(reg))) == 0:
             return []
 
-        for json_file in result_dir.rglob(reg):
-            file_result = TestResult.read_file(json_file, trans_unit=True)
+        for json_file in sorted(result_dir.rglob(reg)):
+            try:
+                file_result = TestResult.read_file(json_file, trans_unit=True)
+            except Exception:
+                log.warning("Skipping invalid or incompatible result file: %s", json_file, exc_info=True)
+                continue
 
             # Group result files of the same run_id into one TestResult
             if file_result.run_id in results_d:

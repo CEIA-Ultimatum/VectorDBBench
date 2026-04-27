@@ -152,6 +152,7 @@ def OSSOpenSearch(**parameters: Unpack[OSSOpenSearchHNSWTypedDict]):
     run(
         db=DB.OSSOpenSearch,
         db_config=OSSOpenSearchConfig(
+            db_label=parameters["db_label"],
             host=parameters["host"],
             port=parameters["port"],
             user=parameters["user"],
